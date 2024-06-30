@@ -1,7 +1,6 @@
 package org.wedonttrack.utils;
 
-import net.minidev.json.JSONObject;
-import net.minidev.json.parser.JSONParser;
+import org.json.JSONObject;
 
 import java.io.InputStreamReader;
 import java.net.URL;
@@ -19,9 +18,7 @@ public class JsonHelper {
             JSONObject jsonObject = null;
             try {
                 inputStreamReader = new InputStreamReader(resource.openStream());
-                JSONParser jsonParser = new JSONParser();
-                Object obj = jsonParser.parse(inputStreamReader);
-                jsonObject = (JSONObject) obj;
+                jsonObject = new JSONObject(inputStreamReader);
                 inputStreamReader.close();
             } catch (Exception e) {
                 throw new IllegalArgumentException("Error in reading file: " + filePath);

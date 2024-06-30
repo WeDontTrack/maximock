@@ -21,10 +21,8 @@ public class MustacheHelper {
 
     public static String generateStringFromTemplateUsingObject(String filePath, Object object) {
         Mustache mustache = mf.compile(filePath);
-
         StringWriter stringWriter = new StringWriter();
         mustache.execute(stringWriter, object);
-
         return stringWriter.toString();
     }
 }

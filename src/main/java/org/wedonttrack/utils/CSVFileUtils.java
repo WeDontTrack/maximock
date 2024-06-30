@@ -21,6 +21,14 @@ public class CSVFileUtils {
             this.requestMethod = requestMethod;
         }
 
+        public String getMappingId() { return this.mappingId; }
+        public String getUrlPathPattern() { return this.urlPathPattern; }
+        public String getRequestMethod() { return this.requestMethod; }
+
+        public void setMappingId(String mappingId) { this.mappingId = mappingId; }
+        public void setUrlPathPattern(String urlPathPattern) { this.urlPathPattern = urlPathPattern; }
+        public void setRequestMethod(String requestMethod) { this.requestMethod = requestMethod; }
+
         @Override
         public String toString(){
             return this.mappingId + "," + this.urlPathPattern + "," + this.requestMethod;
