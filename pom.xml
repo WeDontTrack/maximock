@@ -65,4 +65,11 @@
     </plugins>
   </build>
 
+  <distributionManagement>
+    <repository>
+      <id>wiremock-collection</id>
+      <url/>
+    </repository>
+  </distributionManagement>
+
 </project>
