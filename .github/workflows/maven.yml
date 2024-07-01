@@ -21,7 +21,6 @@ jobs:
       checks: write
       contents: write
       deployments: write
-      id-token: read
       issues: read
       discussions: none
       packages: read
