@@ -44,7 +44,7 @@ jobs:
       run: mvn -B package --file pom.xml
 
     - name: Package jar
-      run: mvn clean -U install:install jar:jar
+      run: mvn jar:jar install:install -U
 
     - name: deploy new version
       run: mvn jar:jar deploy:deploy
