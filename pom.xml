@@ -3,11 +3,11 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>org.wedonttrack</groupId>
-  <artifactId>collectionExecution</artifactId>
-  <version>1.0-SNAPSHOT</version>
+  <artifactId>maximock</artifactId>
+  <version>0.1.1</version>
   <packaging>jar</packaging>
 
-  <name>collectionExecution</name>
+  <name>maximock</name>
   <url>http://maven.apache.org</url>
 
   <properties>
@@ -67,8 +67,8 @@
 
   <distributionManagement>
     <repository>
-      <id>wiremock-collection</id>
-      <url/>
+      <id>github</id>
+      <url>https://maven.pkg.github.com/wedonttrack/maximock</url>
     </repository>
   </distributionManagement>
 

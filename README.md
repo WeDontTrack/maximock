@@ -1,4 +1,4 @@
-# potential-umbrella
+# MaxiMock
 
 
 Alternate method to execute wiremock collections.
