@@ -2,6 +2,7 @@ package org.wedonttrack.config;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.wedonttrack.utils.CommonUtils;
 import org.wedonttrack.utils.Constants;
 
 import java.util.Properties;
@@ -9,13 +10,13 @@ import java.util.Random;
 
 public class WiremockData {
     private static final Logger LOGGER = LogManager.getLogger(WiremockData.class);
-    long randomNum = new Random().nextLong((Constants.MAX_NUM - Constants.MIN_NUM) + 1) + Constants.MIN_NUM;
 
     public Properties properties = new Properties();
 
     public WiremockData() {
         LOGGER.info("Creating global parameters");
-        properties.put("randomNum", randomNum);
+        CommonUtils commonUtils = new CommonUtils();
+        properties.put("random id: ", commonUtils.generateRandomUUID());
 
         LOGGER.info("Loading properties into PropertiesManager");
 
