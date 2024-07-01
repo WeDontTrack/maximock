@@ -16,6 +16,20 @@ on:
 
 jobs:
   build:
+    permissions:
+      actions: write
+      checks: write
+      contents: write
+      deployments: write
+      id-token: read
+      issues: read
+      discussions: none
+      packages: read
+      pages: read
+      pull-requests: none
+      repository-projects: read
+      security-events: write
+      statuses: read
 
     runs-on: ubuntu-latest
 
