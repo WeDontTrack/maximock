@@ -5,6 +5,10 @@ import org.apache.logging.log4j.Logger;
 
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 public class CSVFileUtils {
@@ -36,6 +40,7 @@ public class CSVFileUtils {
     }
 
     public void writeToCSV(List<CSVRow> rows, String filePath){
+        LOGGER.info("Writing data into csv file: {}", filePath);
         try(PrintWriter writer = new PrintWriter(filePath)){
             writer.println("mappingId,urlPathPattern,requestMethod");
             for(CSVRow row: rows) {
@@ -47,5 +52,69 @@ public class CSVFileUtils {
             LOGGER.error("Error: {}", err.getMessage());
             err.printStackTrace();
         }
+    }
+
+    public List<String[]> readCSVFile(String filePath){
+        List<String[]> content = new ArrayList<>();
+        try(BufferedReader br = new BufferedReader(new FileReader(filePath))){
+            String line;
+            while( (line = br.readLine()) != null) {
+                content.add(line.split(","));
+            }
+        } catch (IOException err){
+            LOGGER.info("Error: {}", err.getMessage());
+            err.printStackTrace();
+        }
+        return content;
+    }
+
+    public List<String[]> readCSVData(String filePath, boolean createIfNotFound){
+        List<String[]> rows = new ArrayList<>();
+        try(BufferedReader br = new BufferedReader(new FileReader(filePath))){
+            String line;
+            while((line = br.readLine()) != null){
+                rows.add(line.split(","));
+            }
+        } catch (FileNotFoundException err){
+            if(createIfNotFound){
+                new CSVFileUtils().writeToCSV(null, filePath);
+                rows = readCSVData(filePath, false);
+            }
+        }
+        catch (IOException err){
+            LOGGER.error("Error reading file: {}", err.getMessage());
+        }
+        return rows;
+    }
+
+    public String getMappingIdOfUrlPathPattern(String filePath, String urlPathPattern){
+        List<String[]> contents = this.readCSVFile(filePath);
+        for(String[] row: contents){
+            if(row.length >= 2 && row[1].equals(urlPathPattern)){
+                return row[0];
+            }
+        }
+        return null;
+    }
+
+    public void setMappingIdOfUrlPathPattern(String mappingIdCSVFile, String urlPattern, String mappingId) {
+        List<String[]> contents = this.readCSVData(mappingIdCSVFile, false);
+        boolean found = false;
+        for(String[] row: contents){
+            if(row.length >= 2 && row[1].equals(urlPattern)){
+                row[0] = mappingId;
+                found = true;
+                break;
+            }
+        }
+        if (!found) {
+            String[] newRow = {mappingId, urlPattern, ""};
+            contents.add(newRow);
+        }
+        List<CSVRow> rows = new ArrayList<>();
+        for(String[] content : contents){
+            rows.add(new CSVRow(content[0], content[1], content[2]));
+        }
+        this.writeToCSV(rows, mappingIdCSVFile);
     }
 }
