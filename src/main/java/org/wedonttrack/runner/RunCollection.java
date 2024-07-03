@@ -3,6 +3,7 @@ package org.wedonttrack.runner;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
 import org.wedonttrack.postman.EnvDetails;
+import org.wedonttrack.utils.CSVFileUtils;
 import org.wedonttrack.utils.CommonUtils;
 import org.wedonttrack.utils.Constants;
 import org.wedonttrack.postman.FormatJsonBody;
@@ -24,12 +25,14 @@ import java.util.Map;
 
 public class RunCollection {
     private static final Logger LOGGER = LogManager.getLogger(RunCollection.class);
+    private final OkHttpClient client = new OkHttpClient().newBuilder().build();
+    private final CSVFileUtils csvFileUtils = new CSVFileUtils();
 
     private String envPropertiesFile;
     private String collectionPackage;
     private String mappingIdCSVFile;
 
-    private final OkHttpClient client = new OkHttpClient().newBuilder().build();
+
 
     public RunCollection(){
         this.envPropertiesFile = "sample.properties";
@@ -69,7 +72,7 @@ public class RunCollection {
 
         LOGGER.info("Running collection: {}", collectionPackage);
         FileFinder fileFinder = new FileFinder();
-        List<String> mustacheFiles = fileFinder.findMustacheFiles(collectionPackage); //fileFinder.findMustacheFiles("src/main/resources/mocks");
+        List<String> mustacheFiles = fileFinder.findMustacheFiles(collectionPackage); 
         LOGGER.info("Found {} mustache files", mustacheFiles.size());
         LOGGER.info("Files: {}", mustacheFiles.toString());
 
@@ -96,32 +99,24 @@ public class RunCollection {
     public Response mapWiremock(String mustacheFile, Map<String, String> headers) throws IOException {
         Request.Builder requestBuilder = new Request.Builder();
         String body = FormatJsonBody.format(mustacheFile);
-        //read -
+        //read - mappings from csv file and attach the stub id to the payload, if not present then create one and save it to csv file
 
-        String id = new CommonUtils().generateRandomUUID();
-        //String to json object
+
         JSONObject jsonObject = new JSONObject(body);
-        jsonObject.put("id", id);
         DocumentContext context = JsonPath.parse(jsonObject);
         String urlPattern = context.read("$.request.urlPathPattern");
         String method = context.read("$.request.method");
-        LOGGER.info("Mapping wiremock for: {} {} with id: {}", method, urlPattern, id);
-        LOGGER.info("Mapping wiremock for: {} {}", method, urlPattern);
+        String urlMappingId = csvFileUtils.getMappingIdOfUrlPathPattern(this.mappingIdCSVFile, urlPattern);
+        if(urlMappingId == null){
+            urlMappingId = new CommonUtils().generateRandomUUID();
+            csvFileUtils.setMappingIdOfUrlPathPattern(this.mappingIdCSVFile, urlPattern, urlMappingId);
+        }
 
-        RequestBody requestBody = RequestBody.create(Constants.JSON_MEDIA_TYPE, jsonObject.toString());
-        String newMappingUrl = PropertiesManager.getProperty(Constants.ENV_URL) + Constants.NEW_MAPPING_BASEPATH;
+        boolean newWiremock = this.getStubMappingById(urlMappingId);
+        LOGGER.info("Mapping wiremock for: {} {} with id: {}", method, urlPattern, urlMappingId);
 
-        requestBuilder
-                .url(newMappingUrl)
-                .method("POST", requestBody)
-                .addHeader("Content-Type", "application/json");
+        return this.wireMockAction(urlMappingId, jsonObject, newWiremock? "NEW" : "EDIT");
 
-        headers.forEach(requestBuilder::addHeader);
-
-        Request request = requestBuilder.build();
-        Response response = client.newCall(request).execute();
-
-        return response;
     }
 
     public void getAllMappings(){
@@ -134,15 +129,50 @@ public class RunCollection {
     }
 
     public boolean assertResponse(Response response){
-        return response.code() == 201;
+        return response.code() == 201 || response.code() == 200;
         //add custom assertions if required
     }
 
-    //add Proxy option - if necessary
+    public boolean getStubMappingById(String mappingId) throws IOException {
+        Request.Builder requestBuilder = new Request.Builder();
+        String getMappingUrl = PropertiesManager.getProperty(Constants.ENV_URL) + Constants.GET_MAPPINGS_BASEPATH + "/" + mappingId;
+        requestBuilder
+                .url(getMappingUrl)
+                .method("GET", null);
+        Response response = client.newCall(requestBuilder.build()).execute();
+        return response.code() == 200;
+        //if id not present then returns 500 status code
+        //if id present then 200 status code
+    }
 
-    //add option to update mock based on mock-id
+    public Response wireMockAction(String mappingId, JSONObject body, String wiremockAction) throws IOException{
+        Request.Builder requestBuilder = new Request.Builder();
+        RequestBody requestBody = RequestBody.create(Constants.JSON_MEDIA_TYPE, body.toString());
+        String editMappingUrl = PropertiesManager.getProperty(Constants.ENV_URL) + Constants.GET_MAPPINGS_BASEPATH + "/" + mappingId;
+        body.put("id", mappingId);
 
+        String method = "POST";
+        switch (wiremockAction){
+            case "EDIT":
+                method = "PUT";
+                break;
+            case "NEW":
+                method = "POST";
+                break;
+            case "DELETE":
+                method = "DELETE";
+                requestBody = null;
+                break;
+            default:
+                method = "POST";
+        }
 
-    //add id to mock -
+        requestBuilder
+                .url(editMappingUrl)
+                .method(method, requestBody)
+                .addHeader("Content-Type", "application/json");
+
+        return client.newCall(requestBuilder.build()).execute();
+    }
 
 }
