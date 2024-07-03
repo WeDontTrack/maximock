@@ -3,6 +3,7 @@ package org.wedonttrack.runner;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
 import org.wedonttrack.postman.EnvDetails;
+import org.wedonttrack.utils.CSVFileUtils;
 import org.wedonttrack.utils.CommonUtils;
 import org.wedonttrack.utils.Constants;
 import org.wedonttrack.postman.FormatJsonBody;
@@ -25,7 +26,7 @@ import java.util.Map;
 public class RunCollection {
     private static final Logger LOGGER = LogManager.getLogger(RunCollection.class);
     private final OkHttpClient client = new OkHttpClient().newBuilder().build();
-    private final CSVFileUtils csvFileUtils = new csvFileUtils();
+    private final CSVFileUtils csvFileUtils = new CSVFileUtils();
 
     private String envPropertiesFile;
     private String collectionPackage;
@@ -105,38 +106,17 @@ public class RunCollection {
         DocumentContext context = JsonPath.parse(jsonObject);
         String urlPattern = context.read("$.request.urlPathPattern");
         String method = context.read("$.request.method");
-        String urlMappingId = csvFileUtils.getMappingIdOfUrlPathPattern(this.mappingIdCSVFile, urlPathPattern);
-        if(mappingId == null){
-            mappingId = new CommonUtils().generateRandomUUID();
-            csvFileUtils.setMappingIdOfUrlPathPattern(this.mappingIdCSVFile, urlPathPattern, mappingId);
+        String urlMappingId = csvFileUtils.getMappingIdOfUrlPathPattern(this.mappingIdCSVFile, urlPattern);
+        if(urlMappingId == null){
+            urlMappingId = new CommonUtils().generateRandomUUID();
+            csvFileUtils.setMappingIdOfUrlPathPattern(this.mappingIdCSVFile, urlPattern, urlMappingId);
         }
 
-        boolean newWiremock = this.getStubMappingById(mappingId);
-        if(newWireMock){
-            LOGGER.info("Mapping wiremock for: {} {} with id: {}", method, urlPattern, mappingId);
-            return this.wireMockAction(mappingId, jsonObject, "NEW");
-        }else{
-            LOGGER.info("Editing wiremock for: {} {} with id: {}", method, urlPattern, mappingId);
-            return this.wireMockAction(mappingId, jsonObject, "EDIT");
-        }
+        boolean newWiremock = this.getStubMappingById(urlMappingId);
+        LOGGER.info("Mapping wiremock for: {} {} with id: {}", method, urlPattern, urlMappingId);
 
-        // LOGGER.info("Mapping wiremock for: {} {} with id: {}", method, urlPattern, id);
-        // LOGGER.info("Mapping wiremock for: {} {}", method, urlPattern);
+        return this.wireMockAction(urlMappingId, jsonObject, newWiremock? "NEW" : "EDIT");
 
-        // RequestBody requestBody = RequestBody.create(Constants.JSON_MEDIA_TYPE, jsonObject.toString());
-        // String newMappingUrl = PropertiesManager.getProperty(Constants.ENV_URL) + Constants.NEW_MAPPING_BASEPATH;
-
-        // requestBuilder
-        //         .url(newMappingUrl)
-        //         .method("POST", requestBody)
-        //         .addHeader("Content-Type", "application/json");
-
-        // headers.forEach(requestBuilder::addHeader);
-
-        // Request request = requestBuilder.build();
-        // Response response = client.newCall(request).execute();
-
-        // return response;
     }
 
     public void getAllMappings(){
@@ -149,7 +129,7 @@ public class RunCollection {
     }
 
     public boolean assertResponse(Response response){
-        return response.code() == 201;
+        return response.code() == 201 || response.code() == 200;
         //add custom assertions if required
     }
 
