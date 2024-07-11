@@ -1,8 +1,8 @@
-package org.wedonttrack.postman;
+package io.wedonttrack.postman;
 
+import io.wedonttrack.config.PropertiesManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.wedonttrack.config.PropertiesManager;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;

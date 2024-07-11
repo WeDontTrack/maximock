@@ -1,6 +1,6 @@
-package org.wedonttrack;
+package io.wedonttrack;
 
-import org.wedonttrack.runner.RunCollection;
+import io.wedonttrack.runner.RunCollection;
 
 /**
  * Hello world!

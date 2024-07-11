@@ -1,4 +1,4 @@
-package org.wedonttrack;
+package io.wedonttrack;
 
 import junit.framework.Test;
 import junit.framework.TestCase;

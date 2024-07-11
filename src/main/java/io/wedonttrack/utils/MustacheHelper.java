@@ -1,4 +1,4 @@
-package org.wedonttrack.utils;
+package io.wedonttrack.utils;
 
 import com.github.mustachejava.DefaultMustacheFactory;
 import com.github.mustachejava.Mustache;

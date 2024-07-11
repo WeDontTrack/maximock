@@ -1,7 +1,7 @@
-package org.wedonttrack.postman;
+package io.wedonttrack.postman;
 
-import org.wedonttrack.utils.MustacheHelper;
-import org.wedonttrack.config.PropertiesManager;
+import io.wedonttrack.config.PropertiesManager;
+import io.wedonttrack.utils.MustacheHelper;
 
 /**
  * The FormatJsonBody class is responsible for formatting JSON bodies.

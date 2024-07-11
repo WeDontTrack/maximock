@@ -1,4 +1,4 @@
-package org.wedonttrack.config;
+package io.wedonttrack.config;
 
 public class ConfigParams {
 

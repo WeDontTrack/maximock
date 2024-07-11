@@ -1,4 +1,4 @@
-package org.wedonttrack.exports;
+package io.wedonttrack.exports;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -8,7 +8,6 @@ public class ExportOptions {
     private static final Logger LOGGER = LogManager.getLogger(ExportOptions.class);
 
     //Export all wiremock collections as postman JSON file
-
     //env values - <name>.postman_environment.json
     //curls - <name>.postman_collection.json
     //global values - <name>.postman_globals.json

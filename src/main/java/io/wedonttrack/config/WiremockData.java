@@ -1,12 +1,10 @@
-package org.wedonttrack.config;
+package io.wedonttrack.config;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.wedonttrack.utils.CommonUtils;
-import org.wedonttrack.utils.Constants;
+import io.wedonttrack.utils.CommonUtils;
 
 import java.util.Properties;
-import java.util.Random;
 
 public class WiremockData {
     private static final Logger LOGGER = LogManager.getLogger(WiremockData.class);
